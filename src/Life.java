@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -33,6 +34,17 @@ public class Life extends JComponent implements ActionListener {
   private JTextField timeField = new JTextField(10);
 
   private int timer = 1000;
+
+  private class Pair {
+    int row;
+    int col;
+    boolean alive;
+    public Pair(int row, int col, boolean alive) {
+      this.row = row;
+      this.col = col;
+      this.alive = alive;
+    }
+  }
 
   public Life() {
 
@@ -107,15 +119,67 @@ public class Life extends JComponent implements ActionListener {
 
   }
 
+  public void step() {
+
+    ArrayList<Pair> pairs = new ArrayList<Pair>();
+
+    for (int row = 0; row < GRID_SIZE; row++) {
+      for (int col = 0; col < GRID_SIZE; col++) {
+
+        boolean north = row > 0;
+        boolean south = row < GRID_SIZE - 1;
+        boolean west = col > 0;
+        boolean east = col < GRID_SIZE - 1;
+
+        int neighbors = 0;
+        if (north && cells[row - 1][col]) neighbors++;
+        if (south && cells[row + 1][col]) neighbors++;
+        if (west && cells[row][col - 1]) neighbors++;
+        if (east && cells[row][col + 1]) neighbors++;
+        if (north && west && cells[row - 1][col - 1]) neighbors++;
+        if (north && east && cells[row - 1][col + 1]) neighbors++;
+        if (south && west && cells[row + 1][col - 1]) neighbors++;
+        if (south && east && cells[row + 1][col + 1]) neighbors++;
+
+        if (cells[row][col] && (neighbors < 2 || neighbors > 3)) {
+
+          pairs.add(new Pair(row, col, false));
+
+        } else if (neighbors == 3) {
+
+          pairs.add(new Pair(row, col, true));
+          
+        }
+
+      }
+    }
+
+    for (Pair p : pairs) {
+      cells[p.row][p.col] = p.alive;
+    }
+
+    repaint();
+
+  }
+
   @Override
   public void actionPerformed(ActionEvent e) {
 
     Object source = e.getSource();
-    System.out.println(source);
 
     if (source == step) {
 
+      step();
+
     } else if (source == clear) {
+
+      for (int row = 0; row < GRID_SIZE; row++) {
+        for (int col = 0; col < GRID_SIZE; col++) {
+          cells[row][col] = false;
+        }
+      }
+
+      repaint();
 
     } else if (source == play) {
 
