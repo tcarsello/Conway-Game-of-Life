@@ -16,7 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class Life extends JComponent implements ActionListener {
+public class Life extends JComponent implements ActionListener, Runnable {
 
   public static final int GRID_SIZE = 20;
   public static final int CELL_SIZE = 32;
@@ -34,6 +34,8 @@ public class Life extends JComponent implements ActionListener {
   private JTextField timeField = new JTextField(10);
 
   private int timer = 1000;
+  private boolean running = false;
+  private Thread thread = null;
 
   private class Pair {
     int row;
@@ -108,7 +110,8 @@ public class Life extends JComponent implements ActionListener {
 
         if (cells[row][col]) {
           g.setColor(Color.GREEN);
-          g.fillRect(col * CELL_SIZE + 1, row * CELL_SIZE + 1, CELL_SIZE - 1, CELL_SIZE - 1);
+          g.fillRect(col * CELL_SIZE + 1, row * CELL_SIZE + 1, CELL_SIZE - 1,
+              CELL_SIZE - 1);
         }
 
       }
@@ -148,7 +151,7 @@ public class Life extends JComponent implements ActionListener {
         } else if (neighbors == 3) {
 
           pairs.add(new Pair(row, col, true));
-          
+
         }
 
       }
@@ -159,6 +162,51 @@ public class Life extends JComponent implements ActionListener {
     }
 
     repaint();
+
+  }
+
+  public void start() {
+
+    if (running) return;
+
+    running = true;
+    thread = new Thread(this);
+    thread.start();
+
+  }
+
+  public void stop() {
+
+    if (!running) return;
+
+    running = false;
+
+    try {
+      thread.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    thread = null;
+
+  }
+
+  @Override
+  public void run() {
+
+    while (running) {
+
+      step();
+
+      try {
+
+        Thread.sleep(timer);
+
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+    }
 
   }
 
@@ -183,9 +231,21 @@ public class Life extends JComponent implements ActionListener {
 
     } else if (source == play) {
 
+      start();
+
     } else if (source == stop) {
 
+      stop();
+
     } else if (source == timeField) {
+
+      try {
+
+        timer = Integer.parseInt(timeField.getText());
+
+      } catch (NumberFormatException e1) {
+        timeField.setText("" + timer);
+      }
 
     }
 
