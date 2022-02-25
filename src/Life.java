@@ -2,6 +2,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -15,9 +18,23 @@ public class Life extends JComponent {
   public static final int WIDTH = GRID_SIZE * CELL_SIZE + 1;
   public static final int HEIGHT = GRID_SIZE * CELL_SIZE + 1;
 
+  private boolean cells[][] =  new boolean[GRID_SIZE][GRID_SIZE];
+
   public Life() {
 
     this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+    this.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+
+        int row = e.getY() / CELL_SIZE;
+        int col = e.getX() / CELL_SIZE;
+        cells[row][col] = !cells[row][col];
+
+        repaint();
+
+      }
+    });
 
     JFrame frame = new JFrame("Conway's Game of Life | Thomas Carsello");
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -41,6 +58,22 @@ public class Life extends JComponent {
 
     g.setColor(Color.BLACK);
     g.fillRect(0, 0, WIDTH, HEIGHT);
+
+    for (int row = 0; row < GRID_SIZE; row++) {
+
+      for (int col = 0; col < GRID_SIZE; col++) {
+
+        g.setColor(Color.GRAY);
+        g.drawRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+        if (cells[row][col]) {
+          g.setColor(Color.GREEN);
+          g.fillRect(col * CELL_SIZE + 1, row * CELL_SIZE + 1, CELL_SIZE - 1, CELL_SIZE - 1);
+        }
+
+      }
+
+    }
 
     g.dispose();
 
